@@ -5,5 +5,5 @@ int main()
 {
   printf("Reading Sys Log .....");
   IdsAnalyseSysLog("/var/log/syslog");
-  printf("\n\nLog processing Completed!");
+  printf("\n\n Completed!");
 }
