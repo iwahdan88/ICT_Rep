@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include "ids.h"
 /* Syslog Buffer size */
-#define SYS_LOG_BUFF_SIZE   (1000000)
+#define SYS_LOG_BUFF_SIZE   (1)
 
 typedef enum
 {
@@ -31,24 +31,32 @@ extern void IdsReportEvent(void* event)
 }
 
 /* Periodic Function to fetsch Syslog for Events */
-extern void IdsAnalyseSysLog(char* syslogPath)
+extern int IdsAnalyseSysLog(char* syslogPath)
 {
-  /* Char count , will be used for read contents of syslog */
-  int charCount;
+  /* File offset accumulator for reading new logs */
+  static int logOffset = 0;
+  /* Char writen Count */
+  int charCount = 0;
   /* Open syslog file for reading */
   int fildesSyslog = open(syslogPath, O_RDONLY);
+  /* Open file for writing */
+  int filedesOut = open("/home/iwahdan/Ids.log", O_WRONLY | O_APPEND | O_CREAT);
+  /* move offset to last read Data */
+  lseek(fildesSyslog,logOffset, SEEK_CUR );
   /* Read syslog */
-  if(charCount = read(fildesSyslog,sysLogBuff, SYS_LOG_BUFF_SIZE))
+  while((read(fildesSyslog,sysLogBuff, 1)) && filedesOut)
   {
-    /* Open file for writing */
-    int filedesOut = open("/home/iwahdan/Ids.log", O_WRONLY | O_APPEND | O_CREAT);
-
-    if(filedesOut)
-    {
-      /* Write Log to file */
-      write(filedesOut, sysLogBuff, charCount);
-    }
-    close(filedesOut);
+    /* Write Log to file */
+    charCount += write(filedesOut, sysLogBuff, 1);
+    /* Increment Offset*/
+    logOffset++;
   }
+  close(filedesOut);
   close(fildesSyslog);
+  return charCount;
+}
+/* Clear IDS Log */
+extern void IdsClearLog(void)
+{
+  remove("/home/iwahdan/Ids.log");
 }
