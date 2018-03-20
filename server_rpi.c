@@ -79,6 +79,11 @@ static struct lws_protocols protocols[] =
 
 int main( int argc, char *argv[] )
 {
+	if(argc < 2)
+	{
+		printf("Please specify the port to listen to \n");
+		return -1;
+	}
 	struct lws_context_creation_info info;
 	memset( &info, 0, sizeof(info) );
 
@@ -93,7 +98,7 @@ int main( int argc, char *argv[] )
 	}
 
 
-	info.port = 8000;
+	info.port = atoi(argv[1]);
 	info.protocols = protocols;
 	info.gid = -1;
 	info.uid = -1;

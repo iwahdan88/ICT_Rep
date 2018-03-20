@@ -65,11 +65,18 @@ static struct lws_protocols protocols[] =
 
 int main( int argc, char *argv[] )
 {
+	if(argc < 5)
+	{
+		printf("Please specify the <IP>  <Port> <socks_IP> <socks_port> to connect \n");
+		return -1;
+	}
 	struct lws_context_creation_info info;
 	memset( &info, 0, sizeof(info) );
 
 	info.port = CONTEXT_PORT_NO_LISTEN;
 	info.protocols = protocols;
+	info.socks_proxy_address = argv[3];
+	info.socks_proxy_port = atoi(argv[4]);
 	info.gid = -1;
 	info.uid = -1;
 
@@ -90,8 +97,8 @@ int main( int argc, char *argv[] )
 		{
 			struct lws_client_connect_info ccinfo = {0};
 			ccinfo.context = context;
-			ccinfo.address = "192.168.100.50";
-			ccinfo.port = 8001;
+			ccinfo.address = argv[1];
+			ccinfo.port = atoi(argv[2]);
 			ccinfo.path = "/";
 			ccinfo.host = lws_canonical_hostname( context );
 			ccinfo.origin = "origin";
