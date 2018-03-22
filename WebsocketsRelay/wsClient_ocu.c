@@ -6,11 +6,10 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#define MAX_BUF 10
+#define MAX_BUF 50
 
 static int fd;
-static char *pipeWs = "/tmp/websocpipe";
-
+//static char *pipeWs = "/tmp/websocpipe";
 static struct lws *web_socket = NULL;
 
 static int callback_example( struct lws *wsi, enum lws_callback_reasons reason, void *user, void *in, size_t len )
@@ -30,7 +29,8 @@ static int callback_example( struct lws *wsi, enum lws_callback_reasons reason, 
 			unsigned char buf[LWS_SEND_BUFFER_PRE_PADDING + MAX_BUF + LWS_SEND_BUFFER_POST_PADDING];
 			unsigned char *p = &buf[LWS_SEND_BUFFER_PRE_PADDING];
 			int n = read(fd, p, MAX_BUF);
-			lws_write( wsi, p, n, LWS_WRITE_TEXT );
+			lws_write( wsi, p,n, LWS_WRITE_TEXT );
+
 			break;
 		}
 
@@ -85,7 +85,7 @@ int main( int argc, char *argv[] )
 
 	/* Read from Pipe */
 
-	fd = open(pipeWs, O_RDONLY);
+	fd = open("Wspipe", O_RDONLY);
 
 	struct lws_context *context = lws_create_context( &info );
 
@@ -113,10 +113,10 @@ int main( int argc, char *argv[] )
 			lws_callback_on_writable( web_socket );
 		}
 
-		lws_service( context, /* timeout_ms = */ 250 );
+		lws_service( context, /* timeout_ms = */ 250000 );
 	}
 	/* remove pipe */
-	unlink(pipeWs);
+	unlink("Wspipe");
 	lws_context_destroy( context );
 
 	return 0;

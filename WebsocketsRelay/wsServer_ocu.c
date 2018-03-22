@@ -4,11 +4,9 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-//#include <unistd.h>
+#include <stdlib.h>
 
 static int fd;
-static char *pipeWs = "/tmp/websocpipe";
-
 static int callback_http( struct lws *wsi, enum lws_callback_reasons reason, void *user, void *in, size_t len )
 {
 	switch( reason )
@@ -23,7 +21,7 @@ static int callback_http( struct lws *wsi, enum lws_callback_reasons reason, voi
 	return 0;
 }
 
-#define EXAMPLE_RX_BUFFER_BYTES (10)
+#define EXAMPLE_RX_BUFFER_BYTES (50)
 struct payload
 {
 	unsigned char data[LWS_SEND_BUFFER_PRE_PADDING + EXAMPLE_RX_BUFFER_BYTES + LWS_SEND_BUFFER_POST_PADDING];
@@ -42,7 +40,7 @@ static int callback_example( struct lws *wsi, enum lws_callback_reasons reason, 
 			break;
 
 		case LWS_CALLBACK_SERVER_WRITEABLE:
-			lws_write( wsi, &received_payload.data[LWS_SEND_BUFFER_PRE_PADDING], received_payload.len, LWS_WRITE_TEXT );
+			lws_write( wsi,&received_payload.data[LWS_SEND_BUFFER_PRE_PADDING], received_payload.len, LWS_WRITE_TEXT );
 			break;
 
 		default:
@@ -88,17 +86,25 @@ int main( int argc, char *argv[] )
 	memset( &info, 0, sizeof(info) );
 
 	/* Create FIFO pipe */
-	mkfifo(pipeWs, 0666);
+	if(mkfifo("Wspipe", 0666) < 0)
+	{
+		printf("Piping Failed \n");
+		return -1;
+	}
 
-	fd = open(pipeWs, O_WRONLY);
+	fd = open("Wspipe", O_RDWR);
 
 	if(fd < 0)
 	{
-		printf("Cannot create pipe");
+		printf("Piping Failed \n");
+		return -1;
+	}
+	else
+	{
+		/* PIPE OK */
 	}
 
-
-	info.port = atoi(argv[1]);
+	info.port =   (unsigned int)atoi(argv[1]);
 	info.protocols = protocols;
 	info.gid = -1;
 	info.uid = -1;
